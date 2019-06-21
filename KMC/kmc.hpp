@@ -1,9 +1,9 @@
 #ifndef KMC_HPP
 #define KMC_HPP
 
-#include "KMC/helpers.hpp"
-#include "KMC/lookup_table.hpp"
-#include "KMC/macros.hpp"
+#include "helpers.hpp"
+#include "lookup_table.hpp"
+#include "macros.hpp"
 
 #include <array>
 #include <cassert>

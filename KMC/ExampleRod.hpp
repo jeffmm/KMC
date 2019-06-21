@@ -18,8 +18,8 @@
 //#include "FDPS/particle_simulator.hpp"
 //#include "Util/EigenDef.hpp"
 
-#include "KMC/kmc.hpp"
-#include "KMC/macros.hpp"
+#include "kmc.hpp"
+#include "macros.hpp"
 #include <cassert>
 #include <cmath>
 #include <deque>
