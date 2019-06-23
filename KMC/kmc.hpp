@@ -271,7 +271,7 @@ void KMC<TRod>::CalcTotProbsSD(const TRod *const *rods,
     prob_tot_ = 0;
     for (int j_rod = 0; j_rod < rods_probs_.size(); ++j_rod) {
         if (uniqueFlagJ[j_rod] > 0 && rods[j_rod]->gid != boundID) {
-            if (LUTablePtr_) {
+            if (LUTablePtr_ != nullptr) {
                 rods_probs_[j_rod] =
                     LUCalcProbSD(j_rod, *(rods[j_rod]), bindFactor);
             } else {
@@ -357,13 +357,16 @@ double KMC<TRod>::LUCalcProbSD(const int j_rod, const TRod &rod,
 
     double result;
     // Bypass probability calculation if protein is too far away
-    if (SQR(r_cutoff_) < SQR(distMinArr_[j_rod]))
-        result = 0;
+    if (SQR(r_cutoff_) < SQR(distMinArr_[j_rod])) {
+      //printf("Here: %2.2f < %2.6f\n", r_cutoff_, distMinArr_[j_rod]);
+      result = 0;
+    }
     else {
         double mu0 = muArr_[j_rod];
         double distPerp = distPerpArr_[j_rod];   // Perpendicular distance to
                                                  // rod, changes if croslinker
                                                  // is past the rod end point.
+        //printf("perpDist: %2.8f\n", distPerp);
         double lim0 = -mu0 - (0.5 * rod.length); // Lower limit of integral
         double lim1 = -mu0 + (0.5 * rod.length); // Upper limit of integral
         lims_[j_rod].first = lim0;

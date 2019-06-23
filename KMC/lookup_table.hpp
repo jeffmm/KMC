@@ -175,15 +175,15 @@ class LookupTable {
         }
         if (rowIndex > distPerpGridNumber - 2) {
 #ifndef NDEBUG
-            printf("Warning: distPerp %g very large, clamp to grid UB\n",
-                   distPerp);
+            //printf("Warning: distPerp %g very large, clamp to grid UB\n",
+                   //distPerp);
 #endif
             rowIndex = distPerpGridNumber - 2;
             rowFrac = 1;
         }
         if (colIndex > sboundGridNumber - 2) {
 #ifndef NDEBUG
-            printf("Warning: sbound %g very large, clamp to grid UB\n", sbound);
+            //printf("Warning: sbound %g very large, clamp to grid UB\n", sbound);
 #endif
             colIndex = sboundGridNumber - 2;
             colFrac = 1;
@@ -235,8 +235,8 @@ class LookupTable {
         }
         if (rowIndex > distPerpGridNumber - 2) {
 #ifndef NDEBUG
-            printf("Warning: distPerp %g very large, clamp to grid UB\n",
-                   distPerp);
+            //printf("Warning: distPerp %g very large, clamp to grid UB\n",
+                   //distPerp);
 #endif
             rowIndex = distPerpGridNumber - 2;
             rowFrac = 1;
@@ -268,8 +268,8 @@ class LookupTable {
             lower2 == table.begin() + index2UB) {
             sbound = sboundGrid.back();
 #ifndef NDEBUG
-            printf("Warning: val %g too large, setting sbound to max %g\n", val,
-                   sbound);
+            //printf("Warning: val %g too large, setting sbound to max %g\n", val,
+                   //sbound);
 #endif
             return D * sbound; // Re-dimensionalize
         }
