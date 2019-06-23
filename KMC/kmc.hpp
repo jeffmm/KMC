@@ -18,6 +18,9 @@ class KMC {
     std::vector<double> rods_probs_; ///< binding probabilities
 
     // Spatial variables
+    int n_dim_;                       ///< number of dimensions
+    int n_periodic_;                  ///< number of periodic dimensions
+    double unit_cell_[9];             ///< unit cell matrix
     double pos_[3];                   ///< position of motor head
     std::vector<double> distMinArr_;  ///< min dist to rod segment
     std::vector<double> distPerpArr_; ///< min (perp) dist to rod line
@@ -52,12 +55,24 @@ class KMC {
         distPerpArr_.resize(Npj, 0);
         muArr_.resize(Npj, 0);
         lims_.resize(Npj);
+        n_periodic_ = 0;
+        n_dim_ = 3;
+        for (int i=0; i<n_dim_; ++i) {
+          for (int j=0; j<n_dim_; ++j) {
+            unit_cell_[n_dim_*i+j] = 0.0;
+          }
+          unit_cell_[n_dim_*i+i] = 1.0;
+        }
     }
 
     // Constructor for binding heads with lookup tables
     KMC(const double *pos, const int Npj, const double r_cutoff,
-        LookupTable *LUTablePtr) {
+        LookupTable *LUTablePtr, const int n_dim, const int n_periodic, 
+        const double * unit_cell) {
         setPos(pos);
+        setUnitCell(unit_cell);
+        n_periodic_ = n_periodic;
+        n_dim_ = n_dim;
         r_cutoff_ = r_cutoff;
         prob_tot_ = 0;
         rods_probs_.resize(Npj, 0);
@@ -128,6 +143,12 @@ class KMC {
         }
     }
 
+    void setUnitCell(const double * unit_cell) {
+      for (int i = 0; i < 9; ++i) {
+        unit_cell_[i] = unit_cell[i];
+      }
+    }
+
     virtual ~KMC() {}
 };
 
@@ -147,20 +168,46 @@ template <typename TRod>
 void KMC<TRod>::UpdateRodDistArr(const int j_rod, const TRod &rod) {
     const double rLen = rod.length; // Vector of rod
     const double *rUVec = rod.direction;
-    const double *rCenter = rod.pos;
-    double rVec[3], // Rod length vector
+    const double *rRodScaled = rod.pos;
+    double rCenter[3], // Position of rod center in rescaled units
+           rPos[3], //Position of protein center in rescaled units
+        rVec[3], // Rod length vector
         rMinus[3],  // Rod minus end position vector
         rPlus[3],   // Rod plus end position vector
-        sepVec[3];  // Vector of rod center to protein
+        sepVec[3],  // Vector of rod center to protein
+        ds[3];      // Scaled position separation vector
+    /* First handle periodic subspace */
+    for (int i = 0; i < n_periodic_; ++i) {
+      ds[i] = pos_[i] - rRodScaled[i];
+      ds[i] -= NINT(ds[i]);
+    }
+    /* Rescale rCenter as we go */
+    for (int i = 0; i < n_periodic_; ++i) {
+      sepVec[i] = 0.0;
+      rCenter[i] = 0.0;
+      rPos[i] = 0.0;
+      for (int j = 0; j < n_periodic_; ++j) {
+        sepVec[i] += unit_cell_[n_dim_*i+j] * ds[j];
+        rCenter[i] += unit_cell_[n_dim_*i+j] * rRodScaled[j];
+        rPos[i] += unit_cell_[n_dim_*i+j] * rRodScaled[j];
+      }
+    }
+    /* Then handle free subspace */
+    for (int i = n_periodic_; i < 3; ++i) {
+      sepVec[i] = pos_[i] - rRodScaled[i];
+      rCenter[i] = rRodScaled[i];
+      rPos[i] = pos_[i];
+    }
+
     for (int i = 0; i < 3; ++i) {
         rVec[i] = rLen * rUVec[i];
         rMinus[i] = rCenter[i] - (.5 * rVec[i]);
         rPlus[i] = rCenter[i] + (.5 * rVec[i]);
-        sepVec[i] = pos_[i] - rCenter[i];
+        //sepVec[i] = pos_[i] - rCenter[i];
     }
     // the perpendicular distance & position from protein ends to rod
     double pointMin[3];
-    distMinArr_[j_rod] = dist_point_seg(pos_, rMinus, rPlus, pointMin);
+    distMinArr_[j_rod] = dist_point_seg(rPos, rMinus, rPlus, pointMin);
     // Closest point of end_pos along rod axis from rod center.
     double mu0 = dot3(sepVec, rUVec);
     muArr_[j_rod] = mu0;
@@ -358,7 +405,6 @@ double KMC<TRod>::LUCalcProbSD(const int j_rod, const TRod &rod,
     double result;
     // Bypass probability calculation if protein is too far away
     if (SQR(r_cutoff_) < SQR(distMinArr_[j_rod])) {
-      //printf("Here: %2.2f < %2.6f\n", r_cutoff_, distMinArr_[j_rod]);
       result = 0;
     }
     else {
