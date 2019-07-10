@@ -9,10 +9,6 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED YES)
 
 set(ALLOW_DUPLICATE_CUSTOM_TARGETS TRUE)
-#set(GXX_COVERAGE_COMPILE_FLAGS "-Wunused-value -Wreturn-type")
-#add_definitions(${GXX_COVERAGE_COMPILE_FLAGS})
-
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/.CMake_FFTW")
 
 if(DEBUG)
   set(CMAKE_BUILD_TYPE "Debug")
@@ -24,11 +20,7 @@ endif()
 
 if(CMAKE_BUILD_TYPE MATCHES "^[Dd]ebug")
   # if debug mode, do tests
-  if(TESTS)
-    message("Building unit tests")
-  else()
-    message("Building kmcx in Debug mode")
-  endif()
+  message("Building kmcx in Debug mode")
 else()
   # otherwise set build to release mode by default
   set(CMAKE_BUILD_TYPE "Release")
@@ -42,37 +34,5 @@ if(EXISTS "${LOC_PATH}")
 endif()
 
 # Add executables
+add_subdirectory("KMC")
 
-# Reset build output directory to default
-
-# Configure unit tests
-if (TESTS)
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY)
-  enable_testing()
-  add_subdirectory("tests")
-else()
-  add_subdirectory("KMC")
-endif(TESTS)
-
-# Build the documentation
-# check if Doxygen is installed
-#find_package(Doxygen)
-#if (DOXYGEN_FOUND)
-  #set(CMAKE_RUNTIME_OUTPUT_DIRECTORY)
-  ## set input and output files
-  #set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/docs/Doxyfile)
-  #set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
-
-  ## configure the file
-  #configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
-  #message("Adding Doxygen build target")
-
-  ## Can build docs-only with the `make docs` target
-  #add_custom_target( kmcx_docs
-      #COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
-      #WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-      #COMMENT "Generating documentation with Doxygen"
-      #VERBATIM )
-#else (DOXYGEN_FOUND)
-  #message("Doxygen need to be installed to generate the documentation")
-#endif (DOXYGEN_FOUND)
