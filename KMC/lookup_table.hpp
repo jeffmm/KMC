@@ -166,7 +166,7 @@ class LookupTable {
 
         // clamp to grid bound
         if (rowIndex < 0 || colIndex < 0) {
-          warning("distPerp/sbound too small warning: %g/%g \n", distPerp, sbound);
+          printf("distPerp/sbound too small warning: %g/%g \n", distPerp, sbound);
           return 0.0;
         }
         if (rowIndex < 0) {
