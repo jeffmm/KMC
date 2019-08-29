@@ -6,3 +6,5 @@ MakefileInc.mk
 doc/
 build*
 *.swp
+CMakeFiles*
+CMakeCache*
